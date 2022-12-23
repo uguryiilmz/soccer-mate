@@ -1,0 +1,20 @@
+.InputField {
+    margin-bottom: 0;
+    min-width: 180px;
+    padding-left:8px;
+}
+
+.InputField label, .InputField-error {
+    display: block;
+    font-size: 80%;
+}
+
+.InputField-error {
+    color: red;
+    padding-top: 4px;
+    padding-bottom: 12px;
+}
+
+.InputField input{
+    width:100%;
+}

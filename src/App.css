@@ -1,4 +1,26 @@
-.App {
+html,body{
+  height:100%;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+#root{
+  height:100%;
+}
+
+.App{
+  height:100%;
+  /* background: url("/public/soccer-landing.jpg") ;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover; */
+}
+
+
+/* .App {
   text-align: center;
 }
 
@@ -35,4 +57,4 @@
   to {
     transform: rotate(360deg);
   }
-}
+} */
