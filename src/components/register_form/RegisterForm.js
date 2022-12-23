@@ -19,7 +19,7 @@ const RegisterForm = ({ onSubmit, initialValue = {} }) => {
   const paperStyle={padding :10,minHeight:'70vh',width:'500px',margin:'10px auto'}
   const avatarStyle={backgroundColor:'#1bbd7e'}
 
-  const positions=['Forward','Midfielder','Defender','Goalkeeper']
+  const positions=['Forward','Midfielder','Defender','Goalkeeper','Hey','hey']
   const foot=['Right','Left']
 
   useEffect(() => {
