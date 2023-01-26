@@ -20,9 +20,14 @@ import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Switch from '@mui/material/Switch';
+import { Link } from 'react-router-dom'
+import GameRequestModal from './GameRequestModal';
+
 import { styled } from '@mui/material/styles';
 import SendIcon from '@mui/icons-material/Send';
 import Button from '@mui/material/Button';
+import moment from "moment";
+
 import axios from "axios";
 
 
@@ -259,6 +264,9 @@ export default function Teams() {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [loading,setLoading]= useState(false)
   const [teams,setTeams]=useState([])
+  const [gameModal,openGameModal]=useState(false)
+  const [location,setLocation]=useState('')
+  const [gameTime,setGameTime]=useState('')
 
 
   const {socket}=useContext(SocketContext)
@@ -313,20 +321,25 @@ export default function Teams() {
   };
 
 
-  const handleGameRequest =async (type,selected_id)=>{
-    console.log("selected id",selected_id)
+  const onSubmit = async (selected)=>{
+
+    console.log("selected is",selected)
 
     const notification ={
       sender_id:user._id,
-      receiver_id:selected_id,
+      receiver_id:selected,
       text:'game request',
       date:'2020-02-20',
+      location:location,
+      game_time:gameTime
     }
+
+    console.log("notification",notification)
 
     let notification_id=null
 
     try{
-      const res = await axios.post("/api/notification",notification);
+      const res = await axios.post("/api/notification/game",notification);
       notification_id = res.data._id
       console.log("yes",notification_id)
 
@@ -337,15 +350,25 @@ export default function Teams() {
     }
 
 
-    socket.emit("sendGameRequest", {
+    socket.emit("sendNotification", {
       senderId:user._id,
       senderName: user.username,
-      receiverId: selected_id,
-      type,
+      receiverId: selected,
+      type:'game_notification',
       notificationId:notification_id ? notification_id : null
     });
 
+  }
 
+
+  const handleGameRequest =()=>{
+
+    openGameModal(true)
+
+  }
+
+  const handleCloseGameModal=()=>{
+    openGameModal(false)
   }
 
 
@@ -356,14 +379,15 @@ export default function Teams() {
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - teams && teams.length) : 0;
 
   return (
+    <>
+    <Header style={{width:'100%'}}/>
     <Box sx={{ width: '100%' }}>
-      <Header/>
       <Paper sx={{ width: '100%', mb: 2 }}>
         <EnhancedTableToolbar selected={selected} />
         <TableContainer>
             
           <Table
-            sx={{ minWidth: 750 }}
+            sx={{ minWidth: '100%' }}
             aria-labelledby="tableTitle"
             size='medium'
           >
@@ -384,7 +408,7 @@ export default function Teams() {
                 .map((row, index) => {
                   console.log("row ",row)
                   const isItemSelected = isSelected(row.captain_id);
-                  const labelId = `enhanced-table-checkbox-${index}`;
+                const labelId = `enhanced-table-checkbox-${index}`;
 
                   
                   return (
@@ -413,11 +437,11 @@ export default function Teams() {
                         scope="row"
                         padding="none"
                       >
-                        {row.team_id}
+                        <Link to="/team" state={{team_id:row.team_id}}>{row.team_name}</Link>
                       </TableCell>
                       <TableCell align="right">{row.location}</TableCell>
-                      <TableCell align="right">{row.captain_id}</TableCell>
-                      <TableCell align="right">{row.founded}</TableCell>
+                      <TableCell align="right">{row.captain_name}</TableCell>
+                      <TableCell align="right">{moment(row.createdAt).utc().format('YYYY-MM-DD')}</TableCell>
                     </StyledTableRow>
                   );
                 })}
@@ -443,11 +467,21 @@ export default function Teams() {
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
         <span style={{display:'flex',justifyContent:'end',paddingTop:'15px',paddingBottom:'15px'}}>
-            <ColorButton onClick={()=>handleGameRequest(1,selected)} style={{backgroundColor:'c6002b'}} variant="contained" endIcon={<SendIcon />}>
+            <ColorButton onClick={handleGameRequest} style={{backgroundColor:'c6002b'}} variant="contained" endIcon={<SendIcon />}>
                 GAME REQUEST
             </ColorButton>
         </span>
+        <GameRequestModal 
+        open={gameModal} 
+        onClose={handleCloseGameModal}
+        location={location}
+        locationChange={setLocation}
+        date={gameTime}
+        dateChange={setGameTime}
+        onSubmit={()=>onSubmit(selected)}
+        />
       </Paper>
     </Box>
+    </>
   );
 }

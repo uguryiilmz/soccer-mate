@@ -18,12 +18,14 @@ import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
 import HowToRegOutlinedIcon from '@mui/icons-material/HowToRegOutlined';
 import { blue,green} from '@mui/material/colors';
+import TextField from '@mui/material/TextField';
+
 
 
 
 function RegisterYourTeamDialog(props) {
 
-  const { onClose,open, selectedValue,selectedPlayers, onSelectPlayers,onSubmit } = props;
+  const { onClose,open, selectedValue,selectedPlayers, onSelectPlayers,onTeamFieldsChange,onSubmit } = props;
 
 
 
@@ -41,22 +43,26 @@ function RegisterYourTeamDialog(props) {
     onClose(selectedValue);
   };
 
-  const handleDone=()=>{
+  const handleDone=(e)=>{
+    e.preventDefault()
     console.log("done registering your team")
     onSubmit()
   }
-  // useEffect(() => {
-  //   if(selectedPlayers.length===3){
-  //     setFullTeam(true)
-  //   }
-  // }, [selectedPlayers])
 
+
+
+  const teamFields=(e,field)=>{
+    e.preventDefault()
+    onTeamFieldsChange(e,field)
+  }
 
 
 
   return (
     <Dialog onClose={handleClose} open={open}>
       <DialogTitle>Register your Team</DialogTitle>
+      <TextField id="outlined-basic" label="Team Name" variant="outlined" onChange={(e)=>teamFields(e,'teamName')}/>
+      <TextField id="outlined-basic" label="Location" variant="outlined" onChange={(e)=>teamFields(e,'location')}/>
       <List sx={{ pt: 0 }}>
         {selectedPlayers && selectedPlayers.map((player) => (
           <ListItem key={player.name}>
@@ -69,7 +75,7 @@ function RegisterYourTeamDialog(props) {
           </ListItem>
         ))}
 
-        <ListItem disabled={selectedPlayers.length===1} autoFocus button onClick={handleListItemClick}>
+        <ListItem disabled={selectedPlayers.length===6} autoFocus button onClick={handleListItemClick}>
           <ListItemAvatar>
             <Avatar>
                 <AddIcon/>
@@ -78,7 +84,7 @@ function RegisterYourTeamDialog(props) {
           </ListItemAvatar>
           <ListItemText primary="Add account"/>
         </ListItem>
-        {selectedPlayers.length ===1? 
+        {selectedPlayers.length ===6? 
         <span style={{display:'flex', justifyContent:'center'}}>
           <Button onClick={handleDone} >
                 <Avatar sx={{ bgcolor: green[100], color: green[600] }}>

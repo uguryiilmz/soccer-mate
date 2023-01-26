@@ -31,31 +31,23 @@ const io = require("socket.io")(8900, {
       io.emit("getUsers", users);
     });
   
-    //send and get message
-    socket.on("sendMessage", ({ senderId, receiverId, text }) => {
-      const user = getUser(receiverId);
-      io.to(user.socketId).emit("getMessage", {
-        senderId,
-        text,
-      });
-    });
 
-    socket.on("sendNotification", ({ senderName, receiverId, type }) => {
-        console.log("receiver id",receiverId)
-        const receiver = getUser(receiverId);
-        console.log("receiver is",receiver)
-        io.to(receiver.socketId).emit("getNotification", {
-          senderName,
-          type,
-        });
-      });
+    // socket.on("sendNotification", ({ senderName, receiverId, type }) => {
+    //     console.log("receiver id",receiverId)
+    //     const receiver = getUser(receiverId);
+    //     console.log("receiver is",receiver)
+    //     io.to(receiver.socketId).emit("getNotification", {
+    //       senderName,
+    //       type,
+    //     });
+    //   });
 
-      socket.on("sendGameRequest", ({ senderId,senderName, receiverId, type,notificationId }) => {
+      socket.on("sendNotification", ({ senderId,senderName, receiverId, type,notificationId }) => {
         console.log("receiver id",receiverId)
         console.log("notification id",notificationId)
         const receiver = getUser(receiverId);
         console.log("receiver is",receiver)
-        io.to(receiver.socketId).emit("getGameRequest", {
+        io.to(receiver.socketId).emit("getNotification", {
           senderId,
           senderName,
           type,
@@ -84,6 +76,18 @@ const io = require("socket.io")(8900, {
     //       type,
     //     });
     //   });
+
+
+      //send and get message
+    socket.on("sendMessage", ({ senderId, receiverId, text }) => {
+        console.log("sender",senderId,receiverId,text)
+        const user = getUser(receiverId);
+        console.log("user",user)
+        io.to(user.socketId).emit("getMessage", {
+        senderId,
+        text,
+        });
+    });
 
 
   

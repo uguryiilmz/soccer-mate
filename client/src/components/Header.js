@@ -7,15 +7,26 @@ import {faTwitterSquare, faInstagramSquare} from "@fortawesome/free-brands-svg-i
 import CloseIcon from '@mui/icons-material/Close';
 
 import {  faFacebook , } from '@fortawesome/free-brands-svg-icons';
+import Select from '@mui/material/Select';
+import InputLabel from '@mui/material/InputLabel';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+
+
 
 import { Link } from 'react-router-dom'
-import {useContext,useState,useEffect} from 'react'
+import {useContext,useState,useEffect,useRef} from 'react'
 import {AuthContext} from '../context/AuthContext'
 import {SocketContext} from '../context/SocketContext'
+import MenuItem from '@mui/material/MenuItem';
+
 import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
 import EmailIcon from '@mui/icons-material/Email';
 import SettingsIcon from '@mui/icons-material/Settings';
 import axios from "axios";
+import Button from '@mui/material/Button';
+import Divider from '@mui/material/Divider';
+import Paper from '@mui/material/Paper';
+
 
 
 
@@ -24,8 +35,12 @@ function Header() {
   const {user}=useContext(AuthContext)
   const [openNotifications,setOpenNotifications]=useState(false)
   const [openRequests,setOpenRequests]=useState(false)
+  const [menu, openMenu] = useState(false);
+
   // const [message,setMessage]=useState('Hooray! We found a team for you')
 
+
+  const ref = useRef();
 
   const {socket}=useContext(SocketContext)
   console.log("socket is",socket)
@@ -39,6 +54,37 @@ function Header() {
   const [gameRequests,setGameRequests]=useState([])
 
   const [gameRequestFromDatabase, setGameRequestFromDatabase]=useState([])
+
+
+  function useOnClickOutside(ref, handler) {
+    useEffect(
+      () => {
+        const listener = (event) => {
+          // Do nothing if clicking ref's element or descendent elements
+          if (!ref.current || ref.current.contains(event.target)) {
+            return;
+          }
+          handler(event);
+        };
+        document.addEventListener("mousedown", listener);
+        document.addEventListener("touchstart", listener);
+        return () => {
+          document.removeEventListener("mousedown", listener);
+          document.removeEventListener("touchstart", listener);
+        };
+      },
+      // Add ref and handler to effect dependencies
+      // It's worth noting that because passed in handler is a new ...
+      // ... function on every render that will cause this effect ...
+      // ... callback/cleanup to run every render. It's not a big deal ...
+      // ... but to optimize you can wrap handler in useCallback before ...
+      // ... passing it into this hook.
+      [ref, handler]
+    );
+  }
+
+  useOnClickOutside(ref, () => openMenu(false));
+
 
 
   useEffect(() => {
@@ -70,7 +116,7 @@ function Header() {
   // }, [socket]);
 
   useEffect(() => {
-    socket?.on("getGameRequest", (data) => {
+    socket?.on("getNotification", (data) => {
       console.log("data is",data)
       setGameRequests((prev) => [...prev, data]);
       console.log("game request data",data)
@@ -114,7 +160,7 @@ function Header() {
 
     console.log('note',requests)
 
-    const {senderName, notificationId, senderId} =requests
+    const {senderName, notificationId, senderId, type} =requests
 
     const requestObject= {
       sender:senderName,
@@ -129,8 +175,10 @@ function Header() {
     
     return (
       <span className="notification" key={key}>
-        <Link to="/reviews" state={{requestObject}} className="requestLink">{`${senderName} sent you a game request.`}</Link>
+        {type==='message' && <Link to="/messenger" state={{requestObject}} className="requestLink">{`${senderName} sent you a message.`}</Link>}
+        {type==='game_notification' && <Link to="/reviews" state={{requestObject}} className="requestLink">{`${senderName} sent you a game request.`}</Link>}
       </span>
+
 
     );
   };
@@ -208,7 +256,7 @@ function Header() {
       console.log(err);
     }
   
-    socket.emit("sendGameRequest", {
+    socket.emit("sendNotification", {
       gameRequest
     });
 
@@ -233,6 +281,10 @@ function Header() {
     return unread.length
   }
 
+  const handleMenu=(e)=>{
+    openMenu(true)
+  }
+
 
   return (
     <div className="header">
@@ -245,8 +297,33 @@ function Header() {
       </div>
       <div>
         <ul className="main-header">
-            <li> 
-                <Link to="/about" className="linko">About</Link>
+            <li>
+            <button className="header-button linko" onClick={handleMenu}>About &#9660;</button>
+            {menu &&
+            <Paper className="paper" ref={ref} >
+              <ul className="header-list">
+                <li><Link className="header-link" to="/teams">Opponent Teams</Link></li>
+                <li><Link className="header-link" state={{team_id:user.team_id}}to="/team">Your Team</Link></li>
+                <li><Link className="header-link" to="/upcoming_games">Upcoming Games</Link></li>
+                <li><Link className="header-link" to="/reviews">Game Requests</Link></li>
+                <li><Link className="header-link" to="/messenger">Messages</Link></li>
+              </ul>
+            </Paper>
+
+            
+            }
+            {/* <InputLabel id="demo-simple-select-label">About</InputLabel>
+            <Select
+              labelId="demo-simple-select-label"
+              id="demo-simple-select"
+              value={selection}
+              label="About"
+              onChange={handleSelection}
+            >
+              <MenuItem value={'/teams'}>Opponent Teams</MenuItem>
+              <MenuItem value={'/team'}>Your Team</MenuItem>
+              <MenuItem value={'/upcoming_games'}>Upcoming Games</MenuItem>
+            </Select> */}
             </li>
             {user===null ?
                     <li> 

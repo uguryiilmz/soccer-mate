@@ -14,7 +14,7 @@ function RegisterFormWrapper(){
 
 
     const onSubmit = async (user) =>{
-        console.log("v is",user)
+        console.log("user is",user)
 
         //add team_id
 

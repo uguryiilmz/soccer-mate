@@ -4,6 +4,10 @@ const mongoose = require("mongoose");
 
 const UserSchema = new mongoose.Schema(
   {
+    fullName:{
+        type:String,
+        default:''
+    },
     username: {
       type: String,
       require: true,
@@ -16,7 +20,7 @@ const UserSchema = new mongoose.Schema(
       max: 50,
       unique: true,
     },
-    team:{
+    team_id:{
         type:String,
         default:""
     },

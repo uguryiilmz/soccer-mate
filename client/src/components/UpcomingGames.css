@@ -1,0 +1,23 @@
+
+
+.upcoming-games{
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.games{
+    margin:12px;
+    padding:12px;
+    border:2px solid black;
+    position:relative
+}
+.games-link{
+    text-decoration: none;
+}
+
+.edit-button{
+    position:absolute;
+    top:5px;
+    right:5px;
+}

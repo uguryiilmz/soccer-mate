@@ -8,6 +8,8 @@ const userRoute = require("./routes/users");
 const authRoute = require("./routes/auth");
 const notificationsRoute=require("./routes/notifications");
 const teamsRoute=require("./routes/teams")
+const conversationsRoute=require("./routes/conversations")
+const messagesRoute=require("./routes/messages")
 const router = express.Router();
 const cors = require('cors')
 const path = require("path");
@@ -59,6 +61,9 @@ app.use("/api/auth", authRoute);
 app.use("/api/users", userRoute);
 app.use("/api/notification",notificationsRoute);
 app.use("/api/teams",teamsRoute);
+app.use("/api/conversations",conversationsRoute);
+app.use("/api/messages",messagesRoute);
+
 
 app.disable('etag');
 
