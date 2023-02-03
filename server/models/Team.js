@@ -9,12 +9,20 @@ const TeamSchema = new mongoose.Schema(
       require: true,
       min: 3,
       max: 20,
+      unique:true
+    },
+    team_name:{
+        type:String,
+        require:true
     },
     captain_id: {
       type: String,
       required: true,
       max: 50,
-      unique: true,
+    },
+    captain_name:{
+        type:String,
+        required:true
     },
     location: {
       type: String,

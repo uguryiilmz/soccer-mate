@@ -13,11 +13,18 @@ import IndividualRegisterYourTeamDialog from './IndividualRegisterYourTeamDialog
 import IndividualOnePersonDialog from './IndividualOnePersonDialog';
 import CaptainDialog from './CaptainDialog';
 import RegisterCompleteDialog from './RegisterCompleteDialog';
+import { AuthContext } from '../context/AuthContext';
+import axios from "axios";
+
 
 
 
 function LandingPage() {
   const [open, setOpen] = useState(false);
+
+  const {user}=useContext(AuthContext)
+
+  console.log("user is",user)
 
 
   const [registerDialogOpen,setRegisterDialogOpen]=useState(false)
@@ -61,6 +68,13 @@ function LandingPage() {
 
   const [registerCompleteDialogOpen, setRegisterCompleteDialogOpen]=useState(false)
 
+  const [teamFields,setTeamFields]=useState({
+    'teamName':'',
+    'location':''
+  })
+
+  const [userObjectIds,setUserObjectIds]=useState([])
+
 
 
 
@@ -76,7 +90,44 @@ function LandingPage() {
   //   setRegisterCompleteDialogOpen(true)
   // }
 
-  const handleRegisterDialogSubmit=()=>{
+  const onTeamFieldsChange=(e,field)=>{
+    console.log("team name",e.target.value)
+    const newFields={...teamFields}
+    newFields[field]=e.target.value
+    console.log("new fields are",newFields)
+    setTeamFields(newFields)
+
+  }
+  const handleRegisterDialogSubmit=async ()=>{
+    console.log("here",selectedPlayers)
+
+    //api for connecting team members under the same team
+    const emailsOfSelectedPlayers=[]
+    for (const object of selectedPlayers){
+      for(let i in object){
+        console.log("i is",i)
+        if(i==='email'){
+          emailsOfSelectedPlayers.push(object[i])
+        }
+      }
+
+    }
+
+    console.log("email",userObjectIds)
+    const data = {
+      emailsOfSelectedPlayers:userObjectIds,
+      teamFields:teamFields
+    }
+
+
+    try{
+      const res=await axios.post('/api/teams/'+ user._id,data)
+      console.log("response is",res)
+    }catch(e){
+      console.log('error is',e)
+    }
+
+
     setRegisterCompleteDialogOpen(true)
     handleRegisterDialogClose()
   }
@@ -101,13 +152,11 @@ function LandingPage() {
   }
 
   const handleSelectedValue=(value)=>{
-    console.log("valeu is",value)
     setSelectedValue(value)
     setOpen(false)
   }
 
   const handleIndividualSelectedValue=(value)=>{
-    console.log("value is",value)
     setIndividualSelectedValue(value)
     setIndividualOpen(false)
   }
@@ -126,64 +175,60 @@ function LandingPage() {
   }
 
   const handleSelectedPlayers=(value)=>{
-    console.log("value is",value)
-    console.log("clicked")
+    console.log('val',value)
     setRegisterFormDialogOpen(true)
-    // setSelectedPlayers([...selectedPlayers,value])
-    // console.log("selected players",selectedPlayers)
   }
 
 
   const handleIndividualSelectedPlayers=(value)=>{
-    console.log("individual clicked")
     setIndividualRegisterFormOpen(true)
   }
 
   const selectPlayers=(value)=>{
-    console.log("value is",value)
     setSelectedPlayers([...selectedPlayers,value])
   }
 
 
   const handleRegisterFormDialogClose=(value)=>{
-    console.log("closed")
     setRegisterFormDialogOpen(false)
 
-    // setSelectedValue('')
-    // setselectedValueForRegisterDialog(value)
   }
 
 
   const handleIndividualRegisterFormDialogClose=(value)=>{
-    console.log("closed")
     setIndividualRegisterFormOpen(false)
     setSelectedValue('')
 
-    // setSelectedValue('')
-    // setselectedValueForRegisterDialog(value)
   }
 
 
 
 
-  const handleRegisterFormOnSubmit=(value)=>{
-    console.log("here dude",value)
+  const handleRegisterFormOnSubmit=async (value)=>{
+    console.log("value is",value)
+    try{
+        const res = await axios.post("/api/auth/register",value)
+        console.log("res is",res)
+        setUserObjectIds([...userObjectIds,res.data._id])
+    }catch(err){
+        const errorMsg=err.response.data.errorMessage
+        if(errorMsg){
+            console.log("err is",errorMsg)
+        }
+    }
     setSelectedPlayers([...selectedPlayers,value])
     setRegisterFormDialogOpen(false)
 
   }
 
   const handleIndividualRegisterFormOnSubmit=(value)=>{
-    console.log("here for individual",value)
     setIndividualSelectedPlayers([...individualSelectedPlayers,value])
     setIndividualRegisterFormOpen(false)
-
   }
 
 
 
   const handleIndividualRegisterDialogClose=(value)=>{
-    console.log("doncic")
     setIndividualRegisterDialongOpen(false)
     setSelectedValue('')
     setIndividualSelectedValue('')
@@ -192,11 +237,9 @@ function LandingPage() {
 
   useEffect(()=>{
     if(individualSelectedValue==="group"){
-      console.log("yes group")
       setIndividualRegisterDialongOpen(true)
     }
     if(individualSelectedValue==="individual"){
-      console.log("individual")
       setCaptainDialogOpen(true)
       // setIndividualOnePersonRegisterDialongOpen(true)
       //pair the user with a team and notify them
@@ -217,6 +260,7 @@ function LandingPage() {
     if (selectedCaptainValue==='yes-captain') {
       console.log("captain yes")
       setIndividualOnePersonRegisterDialongOpen(true)
+
     }
     if (selectedCaptainValue==='no-captain'){
       console.log("no captain")
@@ -231,9 +275,9 @@ function LandingPage() {
     <div className='main-landing'>
         <div>
             <Header/>
-            <Typography variant="subtitle1" component="div">
+            {/* <Typography variant="subtitle1" component="div">
               Selected: {selectedValue}
-            </Typography>
+            </Typography> */}
         </div>
         <div className="centered-button">
             <button className="main-button" onClick={handleClickOpen}>FIND GAMES</button>
@@ -281,6 +325,7 @@ function LandingPage() {
         
         <RegisterYourTeamDialog
           selectedPlayers={selectedPlayers}
+          onTeamFieldsChange={onTeamFieldsChange}
           onSelectPlayers={handleSelectedPlayers}
           open={registerDialogOpen}
           onClose={handleRegisterDialogClose}

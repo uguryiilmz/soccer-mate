@@ -1,8 +1,13 @@
 import { useLocation } from 'react-router-dom'
 import axios from "axios";
 import {useEffect,useContext,useState} from 'react'
+import Button from '@mui/material/Button';
 import {SocketContext} from '../context/SocketContext'
 import {AuthContext} from '../context/AuthContext'
+import Header from './Header'
+import './GameRequests.css'
+import moment from "moment";
+
 
 
 
@@ -39,17 +44,19 @@ function GameRequests(){
 
       const filterPendingGames=()=>{
         const res= gameRequests.filter((x) => {
-            console.log("x is",x)
+            console.log("date is",x.request.gameTime,"format",moment(new Date(x.request.gameTime)).format('MMMM Do YYYY, h:mm:ss a'))
             const {request}=x
             console.log("request",request,request.status)
             return request.status==='PENDING'
             
         })
 
+
         console.log('res ',res)
 
         return res
       }
+
 
 
     const handleAccept=async (req)=>{
@@ -59,7 +66,6 @@ function GameRequests(){
 
         const res = await axios.put("/api/notification/"+ _id,{'status':"ACCEPT"});
 
-        console.log("reso",res)
 
         const newGameRequests=[...gameRequests]
 
@@ -129,18 +135,30 @@ function GameRequests(){
 
 
     return(
-        <div>
-            {filterPendingGames().map((req,key)=>{
-            return (
-                <span key={key}>
-                    <div>Request from {req.senderName} </div>
-                    <button onClick={()=>handleAccept(req)}>Accept</button>
-                    <button onClick={()=>handleDeny(req)}>Deny</button>
-                </span>
-            )
-            })}
+        <>
+            <Header/>
+            <div className="requests">
+                <div>
+                {filterPendingGames().length===0?
+                <>
+                    <h4>YOU HAVE NO GAME REQUESTS</h4>
+                </> : <>
+                {filterPendingGames().map((req,key)=>{
+                    return (
+                        <div className="game-requests" key={key}>
+                            <div className="requests-header">Request from {req.senderName} at {req.request.location}  On {moment(new Date(req.request.gameTime)).format('MMMM Do YYYY, h:mm:ss a')}</div>
+                            <div className="requests-buttons">
+                                <Button onClick={()=>handleAccept(req)}>Accept</Button> 
+                                <Button onClick={()=>handleDeny(req)}>Deny</Button> 
+                            </div>
 
-        </div>
+                        </div>
+                    )
+                    })}
+                </>
+                }</div>
+            </div>
+        </>
 
     )
 }

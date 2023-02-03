@@ -6,6 +6,7 @@ import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import axios from "axios";
 import { loginCall } from "../apiCalls"
+import { useNavigate } from "react-router";
 import moment from "moment";
 
 
@@ -22,15 +23,16 @@ import {AuthContext} from '../context/AuthContext'
 
 
 
-const EditForm = ( ) => {
+const RegisterForm = ( ) => {
 
-    const {user,dispatch}=useContext(AuthContext)
+    const navigate = useNavigate();
 
 
-    const profile_pic = '/uploads/'+user.profilePicture
+
 
     const [formFields, setFormFields] = useState({
         'username':'',
+        'email':'',
         "password":'',
         "position":'',
         "address":'',
@@ -40,31 +42,14 @@ const EditForm = ( ) => {
         "profilePicture":''
     })
 
-    useEffect(()=>{
-        let formFieldsFromDatabase={}
-        for(const i in user){
-            if(i==='dateOfBirth'){
-                console.log('yaya',moment(user[i]).utc().format('YYYY-MM-DD'))
-                // formFields[i]=moment(user[i]).utc().format('YYYY-MM-DD')
-                formFieldsFromDatabase[i]=new Date(user[i]).toISOString().slice(0, 10)
-            }
-            else{
-                formFieldsFromDatabase[i]=user[i]
-            }
-       }
-        console.log("formFieldsFromDatabase",formFieldsFromDatabase)
-        setFormFields(formFieldsFromDatabase)
-    },[user])
-
 
     const handleFieldChange=(field,e)=>{
 
         const newFormFields ={...formFields}
 
-        console.log("field is",field,"e is",e)
-
 
         if(field==="profilePicture"){
+
             newFormFields[field]=e.target.files[0]
 
         }else{
@@ -76,23 +61,26 @@ const EditForm = ( ) => {
 
     }
 
-    async function editFields(){
+    async function createUser(){
         const formData = new FormData()
-
-        console.log("newform fields",formFields)
 
         for(const i in formFields){
             formData.append(i,formFields[i])
         }
 
+        for (const e of formData){
+            console.log("e is",e)
+        }
 
         try{
-           const res= await axios.put("/api/users/"+ user._id,formData)
-           dispatch({ type: "LOGIN_SUCCESS", payload: res.data });
+            await axios.post("/api/auth/register",formData)
+            navigate("/sign-in");
 
         }catch(err){
             const errorMsg=err.response.data.errorMessage
-            console.log("err is",errorMsg)
+            if(errorMsg){
+                console.log("err is",errorMsg)
+            }
         }
         
     }
@@ -100,7 +88,7 @@ const EditForm = ( ) => {
     function submitFields(event){
         event.stopPropagation();
         event.preventDefault()
-        editFields()
+        createUser()
     }
 
 
@@ -110,51 +98,68 @@ const EditForm = ( ) => {
 
     return(
             <>
-            <Header/>
             <form
-            onSubmit={submitFields}
-            encType="multipart/form-data"
+                onSubmit={submitFields}
+                encType="multipart/form-data"
             >
             <Grid container rowSpacing={1}>
                 <Paper elevation={10} style={paperStyle}>
                     <Grid align='center'>
                         <Avatar style={avatarStyle}><LockOutlinedIcon/></Avatar>
-                        <h2>Edit Form</h2>
+                        <h2>Register Form</h2>
                     </Grid>
-                    <Grid direction="row" container style={{'marginBottom':'8px'}}  columnSpacing={2}>
-                        <Grid item xs={8} >
+                    <Grid direction="row" container style={{'marginBottom':'12px'}}  columnSpacing={2}>
+                        <Grid item xs={12} >
                             <Button
                                 variant="contained"
                                 component="label"
                                 >
-                                Upload Profile Picture
+                                <span style={{padding:'5px'}}>PROFILE PICTURE</span> 
                                 <input
                                     type="file"
-                                    filename="profilePicture"
+                                    filename="file1"
                                     onChange={e=>handleFieldChange('profilePicture',e)}
                                 />
                             </Button>
-                        </Grid>
-                        <Grid item xs={4} >
-                            
-                            <img src={profile_pic} height={120} alt="profile-pic"/>
                         </Grid>
 
                     </Grid>
                     <Grid align="center" direction="row" container>
                         <Grid item xs={6} style={{ border: "1px solid black" }}>
-                            <TextField style={{width:'100%'}} label='Username' variant="outlined"   value={formFields.username} onChange={event=>handleFieldChange('username',event.target.value)}/>
+                            <TextField style={{width:'100%'}} label='Username' variant="outlined"  onChange={event=>handleFieldChange('username',event.target.value)}/>
                         </Grid>
                         <Grid item xs={6} style={{ border: "1px solid black" }}>
-                            <TextField style={{width:'100%'}} label='Password' placeholder='Enter password' type='password' variant="outlined"  value={formFields.password} onChange={event=>handleFieldChange('password',event.target.value)}/>
+                            <TextField style={{width:'100%'}} label='Email' placeholder='Enter password' variant="outlined" onChange={event=>handleFieldChange('email',event.target.value)}/>
+                        </Grid>
+                    </Grid>
+                    <Grid align="center" direction="row" container>
+                        <Grid item xs={6} style={{ border: "1px solid black" }}>
+                            <TextField style={{width:'100%'}} label='Password' variant="outlined"   type="password" onChange={event=>handleFieldChange('password',event.target.value)}/>
+                        </Grid>
+                        <Grid item xs={6} style={{ border: "1px solid black" }}>
+                            <TextField style={{width:'100%'}} label='Password Confirmation' type="password" placeholder='Enter password'variant="outlined" onChange={event=>handleFieldChange('passwordConfirmation',event.target.value)}/>
                         </Grid>
                     </Grid>
                     <Grid align="center" direction="row" container >
                         <Grid item xs={6} style={{ border: "1px solid black" }}>
-                            <TextField style={{width:'100%'}} label='Position' placeholder='Enter position' variant="outlined"   value={formFields.position} onChange={event=>handleFieldChange('position',event.target.value)}/>
+                        <FormControl fullWidth>
+                            <InputLabel id="select-position">Position</InputLabel>
+                                <Select
+                                    // style={{width:'100%'}}
+                                    labelId="select-position"
+                                    id="select-position"
+                                    label="Position"
+                                    onChange={event=>handleFieldChange('position',event.target.value)}
+                                    >
+                                    <MenuItem value={'Goalkeeper'}>Goalkeeper</MenuItem>
+                                    <MenuItem value={'Defender'}>Defender</MenuItem>
+                                    <MenuItem value={'Midfielder'}>Midfielder</MenuItem>
+                                    <MenuItem value={'Forward'}>Forward</MenuItem>
+                                </Select>
+                            </FormControl>
                         </Grid>
                         <Grid item xs={6} style={{ border: "1px solid black" }}>
-                            <TextField style={{width:'100%'}} label='Address' placeholder='Enter address' variant="outlined"  value={formFields.address} onChange={event=>handleFieldChange('address',event.target.value)}/>
+                            <TextField style={{width:'100%'}} label='Address' placeholder='Enter address' variant="outlined"onChange={event=>handleFieldChange('address',event.target.value)}/>
                         </Grid>
                     </Grid>
                     <Grid align="center" direction="row" container >
@@ -165,7 +170,6 @@ const EditForm = ( ) => {
                                     // style={{width:'100%'}}
                                     labelId="demo-simple-select-label"
                                     id="demo-simple-select"
-                                    value={formFields.foot!==null && formFields.foot}
                                     label="Foot"
                                     onChange={event=>handleFieldChange('foot',event.target.value)}
                                     >
@@ -175,7 +179,7 @@ const EditForm = ( ) => {
                             </FormControl>
                         </Grid>
                         <Grid item xs={6} style={{ border: "1px solid black" }}>
-                            <TextField style={{width:'100%'}} error={formFields.age<18}  helperText={formFields.age<18 && 'Must be older than 18'} label='Age' placeholder='Enter Age' variant="outlined"  value={formFields.age} onChange={event=>handleFieldChange('age',event.target.value)}/>
+                            <TextField style={{width:'100%'}} error={formFields.age && formFields.age<18}  helperText={(formFields.age && formFields.age<18) && 'Must be older than 18'} label='Age' placeholder='Enter Age' variant="outlined"  value={formFields.age} onChange={event=>handleFieldChange('age',event.target.value)}/>
                         </Grid>
                     </Grid>
                     <Grid align="center" direction="row" container >
@@ -194,9 +198,6 @@ const EditForm = ( ) => {
                     />
                         <Button type="submit" color='primary' variant="contained" style={btnstyle} >
                             Submit
-                            {/* {isFetching ?  (
-                                <CircularProgress color="white" size="20px" />
-                                ) : "Login"} */}
                         </Button>
 
                 </Paper>
@@ -207,4 +208,4 @@ const EditForm = ( ) => {
 
 }
 
-export default EditForm
+export default RegisterForm

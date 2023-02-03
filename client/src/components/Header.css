@@ -12,12 +12,11 @@
     color: #333333;
     cursor: pointer;
     display: inline-block;
-    font-size: 14px;
-    font-weight: 500;
+    font-size: 15px;
     line-height: 20px;
     list-style: none;
     margin: 0;
-    padding: 10px 12px;
+    padding: 12px 14px;;
     text-align: center;
     transition: all 200ms;
     vertical-align: baseline;
@@ -114,6 +113,7 @@
 .notifications {
     position: absolute;
     top: 18px;
+    z-index:10;
     right: 104px;
     background-color: white;
     color: black;
@@ -162,10 +162,35 @@
 
   .notification{
     flex:1;
-    padding-top:5px;
   }
 
   .requestLink{
     text-decoration: none;
     color:#333333
   }
+
+  .header-list{
+    list-style: none;
+    text-decoration: none;
+    padding:8px
+
+  }
+
+
+  .header-list li{
+    padding:6px;
+    font-size: 14px;
+    font-weight: 400;
+  }
+
+  .paper{
+    position: absolute;
+    z-index: 13;
+    transform: translate(-45px,3px)
+  }
+
+  .header-link{
+    text-decoration: none;
+  }
+    
+  

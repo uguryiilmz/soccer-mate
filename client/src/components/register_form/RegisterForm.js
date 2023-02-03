@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import SimpleForm from './SimpleForm'
 import InputField from './InputField'
 import Header from '../Header'
-import { Grid,Paper, Avatar } from '@mui/material'
+import { Grid,Paper, Avatar,Button } from '@mui/material'
 import './RegisterForm.css'
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 
@@ -29,6 +29,14 @@ const RegisterForm = ({ onSubmit, initialValue = {} }) => {
     setErrors(errors)
   }, [formFields, valid, errors])
 
+  const handlePictureChange=(e)=>{
+    let newFormData= {...formFields}
+
+    newFormData.profilePicture=e.target.files[0]
+
+    setFormFields(newFormData)
+  }
+
   return (
       <div>
         <Paper elevation={10} style={paperStyle}>
@@ -44,17 +52,18 @@ const RegisterForm = ({ onSubmit, initialValue = {} }) => {
             setErrors(errs)
           }}
         >
+
         <div className="register-field">
           <InputField
 
-            name="name"
+            name="fullName"
             onValidate={(v) =>
               !v || v.length < 3 ? 'Too short!' : null
             }
           />
 
           <InputField
-            name="lastname"
+            name="username"
             onValidate={(v) => (v ? null : 'Required')}
           />
         </div>
@@ -118,12 +127,13 @@ const RegisterForm = ({ onSubmit, initialValue = {} }) => {
               onValidate={(v) => (v ? null : 'Required')}
             />
         </div>
-        <button
-          onClick={() => onSubmit && onSubmit(formFields)}
-          disabled={!valid}
-        >
-          Submit!
-        </button>
+          <button
+      
+            onClick={() => onSubmit && onSubmit(formFields)}
+            disabled={!valid}
+          >
+            Submit!
+            </button>
         </SimpleForm>
       </Paper>
       </div>
