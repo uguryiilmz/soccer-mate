@@ -260,6 +260,7 @@ function LandingPage() {
     if (selectedCaptainValue==='yes-captain') {
       console.log("captain yes")
       setIndividualOnePersonRegisterDialongOpen(true)
+
     }
     if (selectedCaptainValue==='no-captain'){
       console.log("no captain")

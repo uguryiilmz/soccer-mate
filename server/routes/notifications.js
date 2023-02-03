@@ -213,7 +213,6 @@ router.put("/:notification_id", async (req, res) => {
 
             if(req.body.status==='ACCEPT'){
 
-                // console.log("existing before",existing_notification)
                 
                 //create new user
                 const newRequest = {
@@ -225,13 +224,9 @@ router.put("/:notification_id", async (req, res) => {
         
                 existing_notification.request=newRequest
         
-                // console.log("existing notification is",existing_notification)
-    
-                // console.log("noti id",notification_id)
 
         
             }else{    
-                    // console.log("existing before",existing_notification)
                     
                     //create new user
                     const newRequest = {
@@ -242,9 +237,6 @@ router.put("/:notification_id", async (req, res) => {
             
                     existing_notification.request=newRequest
             
-                    // console.log("existing notification is",existing_notification)
-        
-                    // console.log("noti id",notification_id)
         
             }
 
@@ -255,7 +247,6 @@ router.put("/:notification_id", async (req, res) => {
                     {new:true}
                 );
 
-                // console.log("new notifi",new_notification)
                 res.status(200).json(new_notification)
             }catch(e){
                 res.status(500).json(e)
